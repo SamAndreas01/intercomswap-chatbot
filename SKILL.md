@@ -420,6 +420,8 @@ Intercom must expose and describe all interactive commands so agents can operate
 - **Invite delivery**: the invite is a signed JSON/base64 blob. You can deliver it via `0000intercom` **or** out‑of‑band (email, website, QR, etc.).
 - **Welcome**: required for **all** sidechannels (public + invite‑only) **except** `0000intercom`.  
   Configure `--sidechannel-owner` on **every peer** that should accept a channel, and distribute the owner‑signed welcome via `--sidechannel-welcome` (or include it in `/sc_open` / `/sc_invite`).
+- **Joiner startup requirement:** `/sc_join` only subscribes. It does **not** set the owner key.  
+  If a joiner starts **without** `--sidechannel-owner` for that channel, the welcome cannot be verified and messages are **dropped** as “awaiting welcome”.
 - **Important:** `/sc_join` without `--sidechannel-owner` (or a configured welcome) **accepts any sender on that name**.  
   If two owners use the same name, you will see a mixed stream or drops. **Always set the owner for non‑entry channels.**
 - **Owner‑only send (optional)**: use `--sidechannel-owner-write-only 1` or `--sidechannel-owner-write-channels "priv1"` so only the owner pubkey can write; others can join and listen.
@@ -431,6 +433,7 @@ Intercom must expose and describe all interactive commands so agents can operate
 2) Share the **owner key** and **welcome** with all peers that should accept the channel:
    - `--sidechannel-owner "pub1:<owner-pubkey-hex>"`
    - `--sidechannel-welcome "pub1:<welcome_b64>"`
+   - Joiners must include these at **startup** (not only in `/sc_join`).
 3) For **invite‑only** channels, include the welcome in the invite or open request:
    - `/sc_invite --channel "priv1" --pubkey "<peer>" --welcome <json|b64|@file>`
    - `/sc_open --channel "priv1" --invite <json|b64|@file> --welcome <json|b64|@file>`
