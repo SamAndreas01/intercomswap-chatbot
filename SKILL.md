@@ -208,6 +208,8 @@ Sidechannels:
 - **Invite-only join:** peers must hold a valid invite (or be an approved inviter) before they can join protected channels; uninvited joins are rejected.
 - `--sidechannel-welcome-required 0|1` : require a **signed welcome** for all sidechannels (**default: on**).
 - `--sidechannel-owner "<chan:pubkey,chan2:pubkey>"` : channel **owner** peer pubkey (hex). This key signs the welcome and is the source of truth.
+- `--sidechannel-owner-write-only 0|1` : **owner‑only send** for all sidechannels (non‑owners can join/read, their sends are rejected).
+- `--sidechannel-owner-write-channels "chan1,chan2"` : owner‑only send for these channels only.
 - `--sidechannel-welcome "<chan:welcome_b64,chan2:welcome_b64>"` : **pre‑signed welcome** per channel (from `/sc_welcome`). Recommended for `0000intercom`.
   - **Welcome required:** messages are dropped until a valid owner‑signed welcome is verified (invited or not).
 
@@ -283,6 +285,7 @@ Intercom must expose and describe all interactive commands so agents can operate
 - **Invites**: uses the **peer pubkey** (transport identity). Invites may also include the inviter’s **trac address** for payments, but verification is by peer pubkey.
 - **Invite delivery**: the invite is a signed JSON/base64 blob. You can deliver it via `0000intercom` **or** out‑of‑band (email, website, QR, etc.).
 - **Welcome**: required for **all** sidechannels (public + invite‑only). Configure `--sidechannel-owner` on **every peer** that should accept a channel, and distribute the owner‑signed welcome via `--sidechannel-welcome` (or include it in `/sc_open` / `/sc_invite`).
+- **Owner‑only send (optional)**: use `--sidechannel-owner-write-only 1` or `--sidechannel-owner-write-channels "priv1"` so only the owner pubkey can write; others can join and listen.
 
 ### Signed Welcome (Required)
 1) On the **owner** peer, create the welcome:

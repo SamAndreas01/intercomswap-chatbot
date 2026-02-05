@@ -182,6 +182,21 @@ for (const [channel, key] of sidechannelOwnerEntries) {
   const normalizedKey = key.trim().toLowerCase();
   if (channel && normalizedKey) sidechannelOwnerMap.set(channel.trim(), normalizedKey);
 }
+const sidechannelOwnerWriteOnlyRaw =
+  (flags['sidechannel-owner-write-only'] && String(flags['sidechannel-owner-write-only'])) ||
+  env.SIDECHANNEL_OWNER_WRITE_ONLY ||
+  '';
+const sidechannelOwnerWriteOnly = parseBool(sidechannelOwnerWriteOnlyRaw, false);
+const sidechannelOwnerWriteChannelsRaw =
+  (flags['sidechannel-owner-write-channels'] && String(flags['sidechannel-owner-write-channels'])) ||
+  env.SIDECHANNEL_OWNER_WRITE_CHANNELS ||
+  '';
+const sidechannelOwnerWriteChannels = sidechannelOwnerWriteChannelsRaw
+  ? sidechannelOwnerWriteChannelsRaw
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0)
+  : null;
 const sidechannelWelcomeRaw =
   (flags['sidechannel-welcome'] && String(flags['sidechannel-welcome'])) ||
   env.SIDECHANNEL_WELCOME ||
@@ -408,6 +423,8 @@ const sidechannel = new Sidechannel(peer, {
   inviterKeys: sidechannelInviterKeys,
   inviteTtlMs: sidechannelInviteTtlMs,
   welcomeRequired: sidechannelWelcomeRequired,
+  ownerWriteOnly: sidechannelOwnerWriteOnly,
+  ownerWriteChannels: sidechannelOwnerWriteChannels || undefined,
   ownerKeys: sidechannelOwnerMap.size > 0 ? sidechannelOwnerMap : undefined,
   welcomeByChannel: sidechannelWelcomeMap.size > 0 ? sidechannelWelcomeMap : undefined,
   onMessage: scBridgeEnabled

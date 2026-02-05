@@ -98,6 +98,10 @@ class Sidechannel extends Feature {
     this.inviteTtlMs = Number.isSafeInteger(config.inviteTtlMs) ? config.inviteTtlMs : 0;
     this.invitedPeers = new Map();
     this.localInvites = new Map();
+    this.ownerWriteOnly = config.ownerWriteOnly === true;
+    this.ownerWriteChannels = Array.isArray(config.ownerWriteChannels)
+      ? new Set(config.ownerWriteChannels.map((c) => normalizeChannel(c)))
+      : null;
     this.welcomeRequired = config.welcomeRequired !== false;
     this.ownerKeys = new Map();
     const ownerEntries = config.ownerKeys instanceof Map
@@ -294,6 +298,12 @@ class Sidechannel extends Feature {
     if (!this.inviteRequired) return false;
     if (this.inviteRequiredChannels) return this.inviteRequiredChannels.has(channel);
     return true;
+  }
+
+  _ownerWriteOnly(channel) {
+    if (this.ownerWriteOnly) return true;
+    if (this.ownerWriteChannels) return this.ownerWriteChannels.has(normalizeChannel(channel));
+    return false;
   }
 
   _getInviteMap(channel) {
@@ -641,6 +651,16 @@ class Sidechannel extends Feature {
           }
           return;
         }
+        if (this._ownerWriteOnly(entry.name)) {
+          const ownerKey = this._getOwnerKey(entry.name);
+          const author = normalizeKeyHex(payload?.from);
+          if (!ownerKey || !author || author !== ownerKey) {
+            if (this.debug) {
+              console.log(`[sidechannel:${entry.name}] drop (owner-only) from ${this._getRemoteKey(connection)}`);
+            }
+            return;
+          }
+        }
         const payloadId =
           payload?.id ?? `${payload?.from ?? 'unknown'}:${payload?.ts ?? 0}:${payload?.channel ?? entry.name}`;
         const now = this._now();
@@ -779,6 +799,11 @@ class Sidechannel extends Feature {
   broadcast(name, message, options = {}) {
     const channel = String(name || '').trim();
     if (!channel) return false;
+    if (this._ownerWriteOnly(channel)) {
+      const ownerKey = this._getOwnerKey(channel);
+      const selfKey = normalizeKeyHex(this.peer?.wallet?.publicKey);
+      if (!ownerKey || !selfKey || ownerKey !== selfKey) return false;
+    }
     if (options.invite) {
       this._acceptLocalInvite(options.invite, channel);
       if (options.invite?.welcome) {
