@@ -94,6 +94,11 @@ This repo also includes `scripts/escrowctl.mjs` (with wrappers `scripts/escrowct
 - manage program-wide fee config (`config-init`, `config-set`)
 - withdraw accrued fees (`fees-balance`, `fees-withdraw`)
 
+This repo also includes `scripts/solprogctl.mjs` (with wrappers `scripts/solprogctl.sh` and `scripts/solprogctl.ps1`) to deterministically:
+- build the Solana program (`build`)
+- deploy the Solana program (`deploy`)
+- inspect program ids / program keypairs (`id`, `keypair-pubkey`)
+
 This repo also includes wallet/inventory operator tools (no custodial wallet APIs; keys stay local):
 - `scripts/lnctl.mjs` (with wrappers `scripts/lnctl.sh` and `scripts/lnctl.ps1`) for Core Lightning (CLN) ops:
   - on-chain funding address (`newaddr`) + balance (`balance`)
@@ -912,6 +917,25 @@ scripts/solctl.sh token-ata --rpc-url <rpc> --keypair onchain/solana/keypairs/sw
 
 Solana escrow program (one shared deployment per cluster):
 ```bash
+# Build the program (produces solana/ln_usdt_escrow/target/deploy/ln_usdt_escrow.so)
+scripts/solprogctl.sh build
+
+# (One-time) program id keypair.
+# Keep this under onchain/ (gitignored). Its pubkey is the program id.
+# Do NOT generate a new keypair unless you intentionally want a new program id:
+# if program_id != default, you must pass:
+# - maker: `scripts/otc-maker-peer.sh ... --solana-program-id <programId>`
+# - operators: `scripts/escrowctl.sh ... --program-id <programId>` and `scripts/swaprecover.sh ...` (uses trade.sol_program_id)
+mkdir -p onchain/solana/program
+scripts/solprogctl.sh keypair-pubkey --program-keypair onchain/solana/program/ln_usdt_escrow-keypair.json
+
+# Deploy (devnet example). Payer + upgrade authority are local keypairs (no custodial APIs).
+scripts/solprogctl.sh deploy \
+  --rpc-url https://api.devnet.solana.com \
+  --payer onchain/solana/keypairs/swap-fee-collector.json \
+  --program-keypair onchain/solana/program/ln_usdt_escrow-keypair.json \
+  --upgrade-authority onchain/solana/keypairs/swap-fee-collector.json
+
 # Initialize fee config once per cluster (example: 1% = 100 bps).
 scripts/escrowctl.sh config-init --solana-rpc-url <rpc> --solana-keypair onchain/solana/keypairs/swap-fee-collector.json --fee-bps 100
 
