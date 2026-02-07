@@ -320,7 +320,9 @@ async function main() {
     );
 
     if (simulate) {
-      const sim = await pool.call((connection) => connection.simulateTransaction(tx, { commitment }), { label: `${cmd}:simulate` });
+      // web3.js supports config objects for VersionedTransaction simulation, but for legacy
+      // Transaction objects we must call simulateTransaction(tx, signers?, includeAccounts?).
+      const sim = await pool.call((connection) => connection.simulateTransaction(tx), { label: `${cmd}:simulate` });
       process.stdout.write(
         `${JSON.stringify(
           {
@@ -381,7 +383,7 @@ async function main() {
     );
 
     if (simulate) {
-      const sim = await pool.call((connection) => connection.simulateTransaction(tx, { commitment }), { label: `${cmd}:simulate` });
+      const sim = await pool.call((connection) => connection.simulateTransaction(tx), { label: `${cmd}:simulate` });
       process.stdout.write(
         `${JSON.stringify(
           {
@@ -450,7 +452,7 @@ async function main() {
     );
 
     if (simulate) {
-      const sim = await pool.call((connection) => connection.simulateTransaction(tx, { commitment }), { label: 'fees-withdraw:simulate' });
+      const sim = await pool.call((connection) => connection.simulateTransaction(tx), { label: 'fees-withdraw:simulate' });
       process.stdout.write(
         `${JSON.stringify(
           {
@@ -524,7 +526,7 @@ async function main() {
     );
 
     if (simulate) {
-      const sim = await pool.call((connection) => connection.simulateTransaction(tx, { commitment }), { label: 'trade-fees-withdraw:simulate' });
+      const sim = await pool.call((connection) => connection.simulateTransaction(tx), { label: 'trade-fees-withdraw:simulate' });
       process.stdout.write(
         `${JSON.stringify(
           {
