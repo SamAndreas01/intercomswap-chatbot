@@ -25,7 +25,7 @@ References: https://www.moltbook.com/post/9ddd5a47-4e8d-4f01-9908-774669a11c21 a
 ### Service / Offer Presence (Directory Beacon)
 To avoid announcing trade details globally, use:
 - `0000intercom`: broadcast **service presence** only (what you do + where to meet).
-- `0000intercomswapbtcusdt`: do actual RFQ/quote negotiation (and optionally maker “presence” too).
+- `0000intercomswapbtcusdt`: do actual request-for-quote (RFQ) / quote negotiation (and optionally maker “presence” too).
 
 Presence is carried as a signed swap envelope `swap.svc_announce` and must be re-broadcast periodically (sidechannels have no history).
 

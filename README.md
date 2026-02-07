@@ -69,33 +69,6 @@ Pull the latest version of this fork, resolve merge conflicts, and run all tests
 
 ---
 
-## Authenticated API Endpoints (Bearer/API Tokens)
-
-Some price/RPC/API providers require auth headers (for example `Authorization: Bearer ...`).
-
-This repo supports URL-prefix based header injection via one of:
-- `HTTP_HEADERS_JSON` (JSON string)
-- `HTTP_HEADERS_FILE` (path to JSON file)
-- `onchain/http/headers.json` (default, if present; gitignored)
-
-Example `onchain/http/headers.json`:
-```json
-{
-  "rules": [
-    {
-      "match": "https://rpc.example.com/",
-      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
-    }
-  ]
-}
-```
-
-Matching rules:
-- `match` is a simple string prefix (or `*` for all URLs).
-- If multiple rules match, longer prefixes override shorter ones.
-
----
-
 ## Conceptual Flow (BTC(LN) <> USDT(Solana))
 
 ```text
@@ -119,6 +92,21 @@ Settlement
   4) Taker claims USDT on Solana using preimage
   5) Refund path after timeout if LN payment never happens
 ```
+
+## External APIs / RPCs (Defaults)
+
+This stack touches a few external endpoints. Defaults are chosen so local e2e is easy, and live ops are configurable:
+
+- Price oracle (HTTP): by default uses public exchange APIs (no keys): `binance,coinbase,gate,kucoin,okx,bitstamp,kraken`.
+  - Enabled on peers via `--price-oracle 1` (included in `scripts/run-swap-*.sh`).
+  - Configure providers via `--price-providers "<csv>"`.
+- Solana (JSON-RPC over HTTP): bots/tools default to local validator `http://127.0.0.1:8899`.
+  - Configure via `--solana-rpc-url "<url[,url2,...]>"` (comma-separated failover pool).
+- Bitcoin/LN: the BTC leg is **Lightning** (CLN or LND).
+  - Local e2e uses docker regtest stacks under `dev/` (includes `bitcoind`).
+  - Mainnet uses your local LN node (CLN via `bitcoind` RPC, or LND via `neutrino` or `bitcoind` backend).
+
+If any of your HTTP/RPC endpoints require auth headers (Bearer/API tokens), see **Authenticated API Endpoints** near the end of this README.
 
 ---
 
@@ -578,3 +566,28 @@ npm run test:e2e
 
 - `onchain/` contains local wallets, node data, tokens, and other secrets/runtime state and must never be committed.
 - `progress.md` is a local handoff log and is gitignored.
+
+### Authenticated API Endpoints (Bearer/API Tokens)
+
+Some price/RPC/API providers require auth headers (for example `Authorization: Bearer ...`).
+
+This repo supports URL-prefix based header injection via one of:
+- `HTTP_HEADERS_JSON` (JSON string)
+- `HTTP_HEADERS_FILE` (path to JSON file)
+- `onchain/http/headers.json` (default, if present; gitignored)
+
+Example `onchain/http/headers.json`:
+```json
+{
+  "rules": [
+    {
+      "match": "https://rpc.example.com/",
+      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
+    }
+  ]
+}
+```
+
+Matching rules:
+- `match` is a simple string prefix (or `*` for all URLs).
+- If multiple rules match, longer prefixes override shorter ones.
