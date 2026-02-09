@@ -1677,16 +1677,31 @@ export class ToolExecutor {
       const composeFile = resolveWithinRepoRoot(composeFileRaw, { label: 'compose_file', mustExist: true });
       const { stdout } = await dockerCompose({ composeFile, args: ['ps', '--format', 'json'], cwd: process.cwd() });
       const text = String(stdout || '').trim();
-      let services = [];
+
+      // docker compose outputs one JSON object per line (NDJSON), not a single JSON array.
+      // Keep the returned payload small and operator-friendly.
+      const services = [];
       if (text) {
-        try {
-          services = JSON.parse(text);
-        } catch (_e) {
-          // docker compose prints nothing when the project is down; treat as empty list.
-          services = [];
+        for (const line of text.split('\n')) {
+          const s = line.trim();
+          if (!s) continue;
+          try {
+            const row = JSON.parse(s);
+            if (!row || typeof row !== 'object') continue;
+            services.push({
+              service: row.Service ?? null,
+              name: row.Name ?? row.Names ?? null,
+              state: row.State ?? null,
+              status: row.Status ?? null,
+              exit_code: Number.isFinite(Number(row.ExitCode)) ? Number(row.ExitCode) : null,
+              ports: row.Ports ?? null,
+            });
+          } catch (_e) {
+            // Ignore invalid lines.
+          }
         }
       }
-      if (!Array.isArray(services)) services = [];
+
       return { type: 'ln_docker_ps', compose_file: composeFile, services };
     }
 
