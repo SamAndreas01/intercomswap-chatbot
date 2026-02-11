@@ -193,8 +193,6 @@ function deriveScEventDedupKey(evt: any): string {
   if (!evt || typeof evt !== 'object') return '';
   const t = String((evt as any).type || '').trim();
   if (t !== 'sc_event') return '';
-  const seq = typeof (evt as any).seq === 'number' && Number.isFinite((evt as any).seq) ? Math.trunc((evt as any).seq) : 0;
-  if (seq > 0) return `seq:${seq}`;
   const channel = String((evt as any).channel || '').trim();
   const kind = String((evt as any).kind || '').trim();
   const tradeId = String((evt as any).trade_id || '').trim();
@@ -202,6 +200,8 @@ function deriveScEventDedupKey(evt: any): string {
   const signer = String(msg?.signer || '').trim().toLowerCase();
   const sig = String(msg?.sig || '').trim().toLowerCase();
   if (signer && sig) return `sig:${channel}:${kind}:${tradeId}:${signer}:${sig}`;
+  const seq = typeof (evt as any).seq === 'number' && Number.isFinite((evt as any).seq) ? Math.trunc((evt as any).seq) : 0;
+  if (seq > 0) return `seq:${seq}`;
   if (!channel && !kind && !tradeId) return '';
   const ts =
     typeof (evt as any).ts === 'number' && Number.isFinite((evt as any).ts)

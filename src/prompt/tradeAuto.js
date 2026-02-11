@@ -34,10 +34,26 @@ function envelopeSig(evt) {
   return /^[0-9a-f]{128}$/i.test(s) ? s : '';
 }
 
+function normalizePeerHex(value) {
+  const s = String(value || '').trim().toLowerCase();
+  return /^[0-9a-f]{64}$/i.test(s) ? s : '';
+}
+
+function localPeerFromScInfo(raw) {
+  if (!raw || typeof raw !== 'object') return '';
+  const direct =
+    normalizePeerHex(raw?.peer) ||
+    normalizePeerHex(raw?.peerPubkey) ||
+    normalizePeerHex(raw?.peer_pubkey) ||
+    '';
+  if (direct) return direct;
+  const info = isObject(raw?.info) ? raw.info : null;
+  if (!info) return '';
+  return normalizePeerHex(info?.peer) || normalizePeerHex(info?.peerPubkey) || normalizePeerHex(info?.peer_pubkey) || '';
+}
+
 function eventDedupKey(evt) {
   if (!evt || typeof evt !== 'object') return '';
-  const seq = typeof evt?.seq === 'number' && Number.isFinite(evt.seq) ? Math.trunc(evt.seq) : 0;
-  if (seq > 0) return `seq:${seq}`;
   const channel = String(evt?.channel || '').trim();
   const kind = envelopeKind(evt);
   const tradeId = envelopeTradeId(evt);
@@ -46,6 +62,8 @@ function eventDedupKey(evt) {
     const signer = envelopeSigner(evt);
     return `sig:${channel}:${kind}:${tradeId}:${signer}:${sig}`;
   }
+  const seq = typeof evt?.seq === 'number' && Number.isFinite(evt.seq) ? Math.trunc(evt.seq) : 0;
+  if (seq > 0) return `seq:${seq}`;
   if (!channel && !kind && !tradeId) return '';
   const ts = typeof evt?.ts === 'number' && Number.isFinite(evt.ts) ? Math.trunc(evt.ts) : 0;
   return `evt:${channel}:${kind}:${tradeId}:${ts}`;
@@ -1002,14 +1020,11 @@ export class TradeAutoManager {
 
       let localPeer = '';
       try {
-        localPeer = String(
-          (await this._runToolWithTimeout(
-            { tool: 'intercomswap_sc_info', args: {} },
-            { timeoutMs: Math.min(this._toolTimeoutMs, 8_000), label: 'tradeauto_sc_info' }
-          ))?.peer || ''
-        )
-          .trim()
-          .toLowerCase();
+        const scInfo = await this._runToolWithTimeout(
+          { tool: 'intercomswap_sc_info', args: {} },
+          { timeoutMs: Math.min(this._toolTimeoutMs, 8_000), label: 'tradeauto_sc_info' }
+        );
+        localPeer = localPeerFromScInfo(scInfo);
         if (localPeer) this._cachedLocalPeer = localPeer;
       } catch (err) {
         localPeer = String(this._cachedLocalPeer || '').trim().toLowerCase();

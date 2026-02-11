@@ -698,6 +698,7 @@ Recently added/changed tools and guardrails:
   - trace defaults: worker trace is OFF by default; toggle explicitly with `intercomswap_tradeauto_trace_set`.
   - reliability knobs: `tool_timeout_ms` (per-tool timeout inside worker), `sc_ensure_interval_ms` (periodic SC subscribe/reconnect keepalive).
   - waiting-terms liveness knobs: `waiting_terms_*` options bound waiting-time, replay/ping cadence, and timeout leave behavior.
+  - ownership detection: worker resolves local peer identity from SC info shapes returned by runtime (`peer` and `info.peerPubkey` variants) to avoid false `not_owner` settlement skips.
 - `intercomswap_tradeauto_trace_set`: enable/disable backend trace emission at runtime without restarting the full stack.
 - `intercomswap_swap_status_post`: signed status/liveness envelope helper for swap channels.
 - `intercomswap_stack_start`: now auto-starts backend trade automation (rendezvous channels + settlement stages) and reports worker status/errors.
@@ -789,6 +790,7 @@ Current Collin wallet/trading guardrails:
 - Autopost bots stop automatically on insufficient-funds/liquidity errors (and stop on expiry/fill as before).
 - Trade automation now runs server-side (backend worker via `intercomswap_tradeauto_*`), not in browser state. Collin no longer owns client-side settlement loops.
 - Collin sidechannel stream processing deduplicates repeated SC events (including reconnect backlog duplicates) before inserting into the local event store to keep browser CPU/load bounded.
+  - dedupe uses signed envelope identity first (not seq-first), so re-sent identical envelopes with fresh seq values are dropped.
 - Collin keeps invite-only `swap:*` trade channels separate from rendezvous settings:
   - trade channels can be auto-watched for stream visibility after join/invite,
   - but they are never promoted into the global rendezvous channel configuration used for stack start or Offer/RFQ broadcast.
