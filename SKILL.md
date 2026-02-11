@@ -116,7 +116,8 @@ These choices should be surfaced as the initial configuration flow for the skill
 
 ## Agent Control Surface (Mandatory)
 - **Autonomous agents MUST use SC‑Bridge** for sidechannel I/O and command execution.
-- **Do not use the interactive TTY** unless a human explicitly requests it.
+- **Do not use the interactive TTY for normal runtime I/O** unless a human explicitly requests it.
+- **Exception (allowed/expected):** use TTY or interactive CLIs for one-time local bootstrap/setup tasks when tools require operator input (for example LND `create-wallet` / `unlock`, first-run key/wallet setup, similar installer prompts).
 - If a request is ambiguous (e.g., “send a message”), **default to SC‑Bridge**.
 - **Install/run honesty:** if an agent starts a peer inside its own session, **do not claim it is “running”** after the agent exits.  
   Instead, generate a **run script** for humans to start the peer and **track that script** for future changes.
@@ -586,7 +587,15 @@ pear run . --peer-store-name joiner --msb-store-name joiner-msb \
 ```
 
 ### Agent Quick Start (SC‑Bridge Required)
-Use SC‑Bridge for **all** agent I/O. TTY is a human fallback only.
+Use SC‑Bridge for **runtime** agent I/O.
+TTY/interactive CLI is still allowed for one-time setup/bootstrap steps that are inherently interactive (for example LND wallet creation/unlock), then switch back to SC‑Bridge + deterministic tools.
+
+Trac-peer / SC-Bridge boundary policy:
+- Treat this as separation of concerns (not a mixed runtime mode):
+  1) SC-Bridge JSON + deterministic scripts for normal runtime operations.
+  2) TTY/interactive commands only for one-time bootstrap or admin tasks with no equivalent tool yet.
+  3) No unsupervised runtime TTY loops by agents; interactive admin actions should happen in explicit maintenance windows.
+  4) Keep `--sc-bridge-cli 1` disabled by default; if enabled temporarily, use a strict allowlist and disable it again after the task.
 
 1) Generate a token (see SC‑Bridge section below).
 2) Start peer with SC‑Bridge enabled:
