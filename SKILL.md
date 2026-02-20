@@ -1,3 +1,84 @@
+# IntercomSwap Telegram Bot Skill
+
+## Overview
+
+This skill enables agents to interact with the IntercomSwap Telegram Bot to request token swaps, check token prices, and retrieve market charts.
+
+The bot provides a chat-based interface for swap operations.
+
+---
+
+## Capabilities
+
+- Accept swap requests
+- Validate token input
+- Process swap requests
+- Fetch live token prices
+- Generate price charts
+- Provide usage instructions
+
+---
+
+## How to Use
+
+### Start the bot
+Send:
+
+/start
+
+
+---
+
+### Request token swap
+Format:
+
+/swap <amount> <token_from> <token_to>
+
+
+Example:
+
+/swap 10 ETH USDT
+
+
+Agent behavior:
+- Validate input
+- Process swap request
+- Return completion status
+
+---
+
+### Get token price
+
+/price ETH
+
+
+Agent returns live market price.
+
+---
+
+### Get price chart
+
+/chart ETH
+
+
+Agent returns a 7-day market chart image.
+
+---
+
+## Error Handling
+
+- Invalid command → show help
+- Invalid token → reject request
+- Invalid amount → reject request
+
+---
+
+## Requirements
+
+- Telegram bot token configured
+- Internet connection for price API
+- Node.js runtime environment
+
 ---
 name: intercomswap
 description: "Install and operate Intercom Swap: a fork of Intercom that negotiates P2P RFQ swaps over sidechannels and settles BTC over Lightning to USDT on Solana via a shared escrow program, with deterministic operator tooling, recovery, and unattended end-to-end tests."

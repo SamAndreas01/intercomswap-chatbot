@@ -1,3 +1,111 @@
+# IntercomSwap Telegram Bot
+
+A Telegram-based token swap bot built from IntercomSwap.
+
+This project provides a chat interface for requesting token swaps, checking live crypto prices, and viewing real price charts.
+
+Built for the Intercom Vibe Competition.
+
+---
+
+## Features
+
+- Telegram chat interface
+- Token swap request processing
+- Real-time crypto price lookup
+- 7-day price chart generation
+- Error handling and validation
+- Agent instructions via SKILL.md
+
+---
+
+## Commands
+
+### Start bot
+
+/start
+
+
+### Request token swap
+
+/swap <amount> <from_token> <to_token>
+
+
+Example:
+
+/swap 10 ETH USDT
+
+
+---
+
+### Get token price (live data)
+
+/price ETH
+
+
+---
+
+### Get price chart
+
+/chart ETH
+
+
+Bot returns a 7-day price chart image.
+
+---
+
+## Installation
+
+### 1. Clone repository
+
+git clone https://github.com/SamAndreas01/intercomswap-chatbot.git
+
+cd intercomswap-chatbot
+
+
+### 2. Install dependencies
+
+npm install
+
+
+### 3. Set Telegram bot token
+Create environment variable:
+
+
+TOKEN=your_bot_token_here
+
+
+### 4. Run bot
+
+node bot.js
+
+
+---
+
+## Deployment
+
+This bot can be deployed on cloud platforms like Railway for 24/7 uptime.
+
+---
+
+## Proof of Functionality
+
+- Telegram bot accepts swap requests
+- Live crypto price retrieval
+- Chart image generation
+- Running production deployment
+
+Screenshots 
+![myproof](image.png)
+
+---
+
+## Trac Address
+
+PUT_YOUR_TRAC_ADDRESS_HERE
+
+trac14t4pw7flec3ettc5jz2ftess34crwlnneey9ppzuualwewf6gtgsg92my4
+
 # Intercom Swap
 
 This repo is a fork of upstream **Intercom** (Trac-Systems/intercom): a reference implementation of the Intercom stack on Trac Network for an internet of agents.
