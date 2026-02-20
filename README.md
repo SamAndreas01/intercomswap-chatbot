@@ -102,7 +102,7 @@ Screenshots
 
 ## Trac Address
 
-PUT_YOUR_TRAC_ADDRESS_HERE
+MY_ADDRESS_TRAC_HERE
 
 trac14t4pw7flec3ettc5jz2ftess34crwlnneey9ppzuualwewf6gtgsg92my4
 
